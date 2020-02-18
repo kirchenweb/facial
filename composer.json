@@ -17,5 +17,8 @@
         "psr-4": {
             "Sensi\\Facial\\": "./src"
         }
+    },
+    "require-dev": {
+        "toast/unit": "^2.1"
     }
 }
