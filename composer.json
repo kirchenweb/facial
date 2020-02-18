@@ -1,5 +1,5 @@
 {
-    "name": "mauricesvay/php-facedetection",
+    "name": "sensimedia/facial",
     "description": "PHP class to detect one face in images. A pure PHP port of an existing JS code from Karthik Tharavad.",
     "license": "GPL-2.0",
     "homepage": "https://github.com/mauricesvay/php-facedetection",
@@ -10,10 +10,12 @@
         }
     ],
     "require": {
-        "php": ">=5.2.0",
+        "php": ">=7.3",
         "ext-gd": "*"
     },
     "autoload": {
-        "classmap": ["FaceDetector.php", "Exception/"]
+        "psr-4": {
+            "Sensi\\Facial\\": "./src"
+        }
     }
 }
