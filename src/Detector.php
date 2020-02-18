@@ -44,8 +44,11 @@ class Detector
      * @return void
      * @throws Exception
      */
-    public function __construct($detection_data = 'detection.dat')
+    public function __construct($detection_data = null)
     {
+        if (is_null($detection_data)) {
+            $detection_data = dirname(__DIR__).'/resources/detection.dat';
+        }
         if (is_array($detection_data)) {
             $this->detection_data = $detection_data;
             return;
