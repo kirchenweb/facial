@@ -60,7 +60,7 @@ class Detector
         $this->detection_data = unserialize(file_get_contents($detection_data));
     }
 
-    public function fromResource($resource) : Detector
+    public function fromResource($resource) : Detectable
     {
         if (!is_resource($resource)) {
             throw new DomainException("No resource passed");
@@ -69,7 +69,7 @@ class Detector
         return new Detectable($this->detection_data, $canvas);
     }
 
-    public function fromFile(string $file) : Detector
+    public function fromFile(string $file) : Detectable
     {
         if (!is_file($file)) {
             throw new DomainException("$file is not a file");
@@ -78,7 +78,7 @@ class Detector
         return new Detectable($this->detection_data, $canvas);
     }
 
-    public function fromString(string $string) : Detector
+    public function fromString(string $string) : Detectable
     {
         $canvas = imagecreatefromstring($file);
         if (!$canvas) {
