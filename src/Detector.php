@@ -66,22 +66,41 @@ class Detector
         $this->detection_data = unserialize(file_get_contents($detection_data));
     }
 
+    public function fromResource($resource) : Detector
+    {
+        if (!is_resource($resource)) {
+            throw new DomainException("No resource passed");
+        }
+        $this->canvas = $resource;
+        return $this;
+    }
+
+    public function fromFile(string $file) : Detector
+    {
+        if (!is_file($file)) {
+            throw new DomainException("$file is not a file");
+        }
+        $this->canvas = imagecreatefromjpeg($file);
+        return $this;
+    }
+
+    public function fromString(string $string) : Detector
+    {
+        $this->canvas = imagecreatefromstring($file);
+        if (!$this->canvas) {
+            throw new DomainException("$string does not contain a valid image");
+        }
+        return $this;
+    }
+
     /**
-     * @param string|resource $file Either a filename, a string of image data or
-     *  an `imagecreate` resource.
      * @return bool
      * @throws Exception
      */
-    public function faceDetect($file) : bool
+    public function detectFace() : bool
     {
-        if (is_resource($file)) {
-            $this->canvas = $file;
-        } elseif (is_file($file)) {
-            $this->canvas = imagecreatefromjpeg($file);
-        } elseif (is_string($file)) {
-            $this->canvas = imagecreatefromstring($file);
-        } else {
-            throw new Exception("Can not load $file");
+        if (!isset($this->canvas)) {
+            throw new Exception("Canvas not set! Initialize with one of the fromXXX methods");
         }
 
         $im_width = imagesx($this->canvas);
