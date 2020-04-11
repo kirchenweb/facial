@@ -34,9 +34,6 @@ class Detector
     /** @var array|null */
     protected ?array $face;
 
-    /** @var resource */
-    private $reduced_canvas;
-
     /**
      * Creates a face-detector with the given configuration
      *
@@ -100,10 +97,9 @@ class Detector
         }
 
         if ($ratio != 0) {
-            $this->reduced_canvas = imagecreatetruecolor($im_width / $ratio, $im_height / $ratio);
-
+            $canvas = imagecreatetruecolor($im_width / $ratio, $im_height / $ratio);
             imagecopyresampled(
-                $this->reduced_canvas,
+                $canvas,
                 $this->canvas,
                 0,
                 0,
@@ -114,36 +110,23 @@ class Detector
                 $im_width,
                 $im_height
             );
-
-            $stats = $this->getImgStats($this->reduced_canvas);
-
-            $this->face = $this->doDetectGreedyBigToSmall(
-                $stats['ii'],
-                $stats['ii2'],
-                $stats['width'],
-                $stats['height']
-            );
-            if (!$this->face) {
-                return false;
-            }
-
-            if ($this->face['w'] > 0) {
-                $this->face['x'] *= $ratio;
-                $this->face['y'] *= $ratio;
-                $this->face['w'] *= $ratio;
-            }
         } else {
-            $stats = $this->getImgStats($this->canvas);
-
-            $this->face = $this->doDetectGreedyBigToSmall(
-                $stats['ii'],
-                $stats['ii2'],
-                $stats['width'],
-                $stats['height']
-            );
-            if (!$this->face) {
-                return false;
-            }
+            $canvas = $this->canvas;
+        }
+        $stats = new ImageStats($canvas);
+        $this->face = $this->doDetectGreedyBigToSmall(
+            $stats->ii,
+            $stats->ii2,
+            $stats->width,
+            $stats->height
+        );
+        if (!$this->face) {
+            return false;
+        }
+        if ($this->face['w'] > 0) {
+            $this->face['x'] *= $ratio;
+            $this->face['y'] *= $ratio;
+            $this->face['w'] *= $ratio;
         }
         return ($this->face['w'] > 0);
     }
@@ -162,8 +145,8 @@ class Detector
             $this->canvas,
             $this->face['x'],
             $this->face['y'],
-            $this->face['x']+$this->face['w'],
-            $this->face['y']+ $this->face['w'],
+            $this->face['x'] + $this->face['w'],
+            $this->face['y'] + $this->face['w'],
             $color
         );
 
@@ -206,55 +189,6 @@ class Detector
         return $this->face;
     }
 
-    protected function getImgStats($canvas) : array
-    {
-        $image_width = imagesx($canvas);
-        $image_height = imagesy($canvas);
-        $iis =  $this->computeII($canvas, $image_width, $image_height);
-        return [
-            'width' => $image_width,
-            'height' => $image_height,
-            'ii' => $iis['ii'],
-            'ii2' => $iis['ii2'],
-        ];
-    }
-
-    protected function computeII($canvas, int $image_width, int $image_height) : array
-    {
-        $ii_w = $image_width + 1;
-        $ii_h = $image_height + 1;
-        $ii = [];
-        $ii2 = [];
-
-        for ($i = 0; $i < $ii_w; $i++) {
-            $ii[$i] = 0;
-            $ii2[$i] = 0;
-        }
-
-        for ($i = 1; $i < $ii_h - 1; $i++) {
-            $ii[$i*$ii_w] = 0;
-            $ii2[$i*$ii_w] = 0;
-            $rowsum = 0;
-            $rowsum2 = 0;
-            for ($j=1; $j<$ii_w-1; $j++) {
-                $rgb = ImageColorAt($canvas, $j, $i);
-                $red = ($rgb >> 16) & 0xFF;
-                $green = ($rgb >> 8) & 0xFF;
-                $blue = $rgb & 0xFF;
-                $grey = (0.2989*$red + 0.587*$green + 0.114*$blue)>>0;  // this is what matlab uses
-                $rowsum += $grey;
-                $rowsum2 += $grey*$grey;
-
-                $ii_above = ($i-1)*$ii_w + $j;
-                $ii_this = $i*$ii_w + $j;
-
-                $ii[$ii_this] = $ii[$ii_above] + $rowsum;
-                $ii2[$ii_this] = $ii2[$ii_above] + $rowsum2;
-            }
-        }
-        return ['ii' => $ii, 'ii2' => $ii2];
-    }
-
     protected function doDetectGreedyBigToSmall(array $ii, array $ii2, int $width, int $height) :? array
     {
         $s_w = $width / 20.0;
@@ -269,7 +203,7 @@ class Detector
             $inv_area = 1 / ($w*$w);
             for ($y = 0; $y < $endy; $y += $step) {
                 for ($x = 0; $x < $endx; $x += $step) {
-                    $passed = $this->detectOnSubImage($x, $y, $scale, $ii, $ii2, $w, $width+1, $inv_area);
+                    $passed = $this->detectOnSubImage($x, $y, $scale, $ii, $ii2, $w, $width + 1, $inv_area);
                     if ($passed) {
                         return ['x' => $x, 'y' => $y, 'w' => $w];
                     }
@@ -279,7 +213,7 @@ class Detector
         return null;
     }
 
-    protected function detectOnSubImage(int $x, int $y, int $scale, array $ii, array $ii2, int $w, int $iiw, int $inv_area) : bool
+    protected function detectOnSubImage(int $x, int $y, float $scale, array $ii, array $ii2, int $w, int $iiw, float $inv_area) : bool
     {
         $mean = ($ii[($y + $w) * $iiw + $x + $w] + $ii[$y * $iiw + $x] - $ii[($y + $w) * $iiw + $x] - $ii[$y * $iiw + $x + $w]) * $inv_area;
         $vnorm = ($ii2[($y + $w) * $iiw + $x + $w]
