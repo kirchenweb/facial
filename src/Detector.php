@@ -26,12 +26,15 @@ use Exception;
 class Detector
 {
     /** @var array */
-    protected $detection_data;
+    protected array $detection_data;
 
+    /** @var resource */
     protected $canvas;
 
-    protected $face;
+    /** @var array|null */
+    protected ?array $face;
 
+    /** @var resource */
     private $reduced_canvas;
 
     /**
@@ -67,8 +70,8 @@ class Detector
     }
 
     /**
-     * @param mixed $file Either a filename, a string of image date or an
-     *  `imagecreate` resource.
+     * @param string|resource $file Either a filename, a string of image data or
+     *  an `imagecreate` resource.
      * @return bool
      * @throws Exception
      */
@@ -145,6 +148,12 @@ class Detector
         return ($this->face['w'] > 0);
     }
 
+    /**
+     * Outputs the current canvas directly as JPEG.
+     *
+     * @return void
+     * @TODO do we need to keep this?
+     */
     public function toJpeg() : void
     {
         $color = imagecolorallocate($this->canvas, 255, 0, 0); //red
