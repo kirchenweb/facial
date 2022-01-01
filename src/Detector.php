@@ -22,6 +22,7 @@
 namespace Sensi\Facial;
 
 use Exception;
+use DomainExceptionb;
 
 class Detector
 {
