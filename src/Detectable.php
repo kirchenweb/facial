@@ -18,11 +18,14 @@
 //         karthik_tharavaad@yahoo.com
 // @Contributor Maurice Svay
 //              maurice@svay.Com
+// @Contributor Marijn Ophorst
+//              marijn@sensimedia.nl
 
 namespace Sensi\Facial;
 
 use Exception;
 use DomainException;
+use GdImage;
 
 class Detectable
 {
@@ -35,6 +38,8 @@ class Detectable
     /** @var array|null */
     protected ?array $face;
 
+    protected int $phpversion;
+
     /**
      * Creates a face-detector with the given configuration
      *
@@ -42,14 +47,18 @@ class Detectable
      * a filepath to a serialized array file-dump
      *
      * @param array $detection_data
-     * @param resource $canvas
+     * @param resource|GdImage $canvas
      * @return void
      * @throws Exception
      */
     public function __construct(array $detection_data, $canvas)
     {
-        if (!is_resource($canvas)) {
+        $this->phpversion = (int)phpversion();
+        if ($this->phpversion < 8 && !is_resource($canvas)) {
             throw new DomainException("Canvas must be passed as a resource");
+        }
+        if ($this->phpversion >= 8 && !($canvas instanceof GdImage)) {
+            throw new DomainException("Canvas must be passed as an instance of GdImage");
         }
         $this->detection_data = $detection_data;
         $this->canvas = $canvas;
