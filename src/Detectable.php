@@ -87,7 +87,7 @@ class Detectable
         }
 
         if ($ratio != 0) {
-            $canvas = imagecreatetruecolor($im_width / $ratio, $im_height / $ratio);
+            $canvas = imagecreatetruecolor(round($im_width / $ratio), round($im_height / $ratio));
             imagecopyresampled(
                 $canvas,
                 $this->canvas,
@@ -95,8 +95,8 @@ class Detectable
                 0,
                 0,
                 0,
-                $im_width / $ratio,
-                $im_height / $ratio,
+                round($im_width / $ratio),
+                round($im_height / $ratio),
                 $im_width,
                 $im_height
             );
