@@ -358,16 +358,16 @@
         },
         {
             "name": "toast/unit",
-            "version": "2.1.6",
+            "version": "2.1.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/toast-php/unit.git",
-                "reference": "8fd9067ee4a5c3920a3639467adcab04ea213b51"
+                "reference": "9088061d73356f543a2cfe26cc8472394b1d4907"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/toast-php/unit/zipball/8fd9067ee4a5c3920a3639467adcab04ea213b51",
-                "reference": "8fd9067ee4a5c3920a3639467adcab04ea213b51",
+                "url": "https://api.github.com/repos/toast-php/unit/zipball/9088061d73356f543a2cfe26cc8472394b1d4907",
+                "reference": "9088061d73356f543a2cfe26cc8472394b1d4907",
                 "shasum": ""
             },
             "require": {
@@ -398,9 +398,9 @@
             "description": "Super-simple unit testing for PHP7",
             "support": {
                 "issues": "https://github.com/toast-php/unit/issues",
-                "source": "https://github.com/toast-php/unit/tree/2.1.6"
+                "source": "https://github.com/toast-php/unit/tree/2.1.7"
             },
-            "time": "2021-01-11T06:40:27+00:00"
+            "time": "2022-01-02T13:52:06+00:00"
         },
         {
             "name": "ulrichsg/getopt-php",
