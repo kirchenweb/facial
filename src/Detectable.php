@@ -183,10 +183,10 @@ class Detectable
         $start_scale = $s_h < $s_w ? $s_h : $s_w;
         $scale_update = 1 / 1.2;
         for ($scale = $start_scale; $scale > 1; $scale *= $scale_update) {
-            $w = (20 * $scale) >> 0;
+            $w = round(20 * $scale) >> 0;
             $endx = $width - $w - 1;
             $endy = $height - $w - 1;
-            $step = max($scale, 2) >> 0;
+            $step = round(max($scale, 2)) >> 0;
             $inv_area = 1 / ($w*$w);
             for ($y = 0; $y < $endy; $y += $step) {
                 for ($x = 0; $x < $endx; $x += $step) {
@@ -234,10 +234,10 @@ class Detectable
                     for ($i_rect = 0; $i_rect < $count_rects; $i_rect++) {
                         $s = $scale;
                         $rect = $rects[$i_rect];
-                        $rx = ($rect[0] * $s + $x) >> 0;
-                        $ry = ($rect[1] * $s + $y) >> 0;
-                        $rw = ($rect[2] * $s) >> 0;
-                        $rh = ($rect[3] * $s) >> 0;
+                        $rx = round($rect[0] * $s + $x) >> 0;
+                        $ry = round($rect[1] * $s + $y) >> 0;
+                        $rw = round($rect[2] * $s) >> 0;
+                        $rh = round($rect[3] * $s) >> 0;
                         $wt = $rect[4];
                         $r_sum = ($ii[($ry + $rh) * $iiw + $rx + $rw]
                                   + $ii[$ry * $iiw + $rx]
