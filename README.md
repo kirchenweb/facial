@@ -27,7 +27,7 @@ $ composer require sensimedia/facial
 use Sensi\Facial\Detector;
 
 $detector = new Detector;
-$hasFace = $detector->faceDetect('/path/to/file');
+$hasFace = $detector->fromFile('/path/to/file')->detectFace();
 var_dump($hasFace);
 ```
 
