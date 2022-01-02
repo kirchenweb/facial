@@ -63,11 +63,7 @@ class Detector
 
     public function fromResource($resource) : Detectable
     {
-        if (!is_resource($resource)) {
-            throw new DomainException("No resource passed");
-        }
-        $canvas = $resource;
-        return new Detectable($this->detection_data, $canvas);
+        return new Detectable($this->detection_data, $resource);
     }
 
     public function fromFile(string $file) : Detectable
