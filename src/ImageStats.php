@@ -3,6 +3,7 @@
 namespace Sensi\Facial;
 
 use DomainException;
+use GdImage;
 
 class ImageStats
 {
@@ -15,14 +16,17 @@ class ImageStats
     protected array $ii2;
 
     /**
-    * @param resource $canvas
+    * @param resource|GdImage $canvas
     * @return void
     * @throws DomainException
     */
     public function __construct($canvas)
     {
-        if (!is_resource($canvas)) {
-            throw new DomainException;
+        $version = (int)phpversion();
+        if ($version <= 7 && !is_resource($canvas)) {
+            throw new DomainException('$canvas must be a resource');
+        } elseif ($version >= 8 && !($canvas instanceof GdImage)) {
+            throw new DomainException('$canvas must be an instance of GdImage');
         }
         $image_width = imagesx($canvas);
         $image_height = imagesy($canvas);
