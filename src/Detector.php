@@ -61,11 +61,23 @@ class Detector
         $this->detection_data = unserialize(file_get_contents($detection_data));
     }
 
+    /**
+     * Create a detectable from a resource.
+     *
+     * @param resource|GdImage $resource
+     * @return Sensi\Facial\Detectable
+     */
     public function fromResource($resource) : Detectable
     {
         return new Detectable($this->detection_data, $resource);
     }
 
+    /**
+     * Create a detectable from a filename.
+     *
+     * @param string $file
+     * @return Sensi\Facial\Detectable
+     */
     public function fromFile(string $file) : Detectable
     {
         if (!is_file($file)) {
@@ -75,6 +87,12 @@ class Detector
         return new Detectable($this->detection_data, $canvas);
     }
 
+    /**
+     * Create a detectable from a (binary) string.
+     *
+     * @param string $string
+     * @return Sensi\Facial\Detectable
+     */
     public function fromString(string $string) : Detectable
     {
         $canvas = imagecreatefromstring($file);
