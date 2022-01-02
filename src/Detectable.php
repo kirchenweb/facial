@@ -45,7 +45,7 @@ class Detectable
      * a filepath to a serialized array file-dump
      *
      * @param array $detection_data
-     * @param resource $canvas
+     * @param resource|GdImage $canvas
      * @return void
      * @throws Exception
      */
