@@ -18,6 +18,8 @@
 //         karthik_tharavaad@yahoo.com
 // @Contributor Maurice Svay
 //              maurice@svay.Com
+// @Contributor Marijn Ophorst
+//              marijn@sensimedia.nl
 
 namespace Sensi\Facial;
 
