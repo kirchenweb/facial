@@ -22,10 +22,9 @@ class ImageStats
     */
     public function __construct($canvas)
     {
-        $version = (int)phpversion();
-        if ($version <= 7 && !is_resource($canvas)) {
+        if (PHP_VERSION_ID < 80000 && !is_resource($canvas)) {
             throw new DomainException('$canvas must be a resource');
-        } elseif ($version >= 8 && !($canvas instanceof GdImage)) {
+        } elseif (PHP_VERSION_ID >= 80000 && !($canvas instanceof GdImage)) {
             throw new DomainException('$canvas must be an instance of GdImage');
         }
         $image_width = imagesx($canvas);
