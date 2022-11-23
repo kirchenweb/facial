@@ -38,12 +38,6 @@ class Detectable
     /** @var array|null */
     protected ?array $face;
 
-		/** @var int $abortTimeInMilliseconds */
-		protected int $abortTimeInMilliseconds;
-
-		/** @var int $timeStart */
-		protected int $timeStart;
-
 	/**
      * Creates a face-detector with the given configuration
      *
@@ -55,7 +49,7 @@ class Detectable
      * @return void
      * @throws Exception
      */
-    public function __construct(array $detection_data, $canvas, int $abortTimeAfterInMilliseconds = 2000)
+    public function __construct(array $detection_data, $canvas)
     {
         if (PHP_VERSION_ID < 80000 && !is_resource($canvas)) {
             throw new DomainException("Canvas must be passed as a resource");
@@ -65,16 +59,17 @@ class Detectable
         }
         $this->detection_data = $detection_data;
         $this->canvas = $canvas;
-				$this->abortTimeInMilliseconds = $abortTimeAfterInMilliseconds;
-				$this->timeStart = $this->getTimeInMilliseconds();
     }
 
     /**
      * @return bool
      * @throws Exception
      */
-    public function detectFace() : bool
+    public function detectFace(int $abortTimeAfterInMilliseconds = 2000) : bool
     {
+				$this->abortTimeInMilliseconds = $abortTimeAfterInMilliseconds;
+				$this->timeStart = $this->getTimeInMilliseconds();
+
         if (!isset($this->canvas)) {
             throw new Exception("Canvas not set! Initialize with one of the fromXXX methods");
         }
@@ -115,6 +110,8 @@ class Detectable
             $stats->width,
             $stats->height
         );
+				unset($this->abortTimeInMilliseconds);
+				unset($this->timeStart);
         if (!$this->face) {
             return false;
         }
