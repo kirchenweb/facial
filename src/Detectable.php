@@ -38,7 +38,13 @@ class Detectable
     /** @var array|null */
     protected ?array $face;
 
-    /**
+		/** @var int $abortTimeInMilliseconds */
+		protected int $abortTimeInMilliseconds;
+
+		/** @var int $timeStart */
+		protected int $timeStart;
+
+	/**
      * Creates a face-detector with the given configuration
      *
      * Configuration can be either passed as an array or as
@@ -49,7 +55,7 @@ class Detectable
      * @return void
      * @throws Exception
      */
-    public function __construct(array $detection_data, $canvas)
+    public function __construct(array $detection_data, $canvas, int $abortTimeAfterInMilliseconds = 2000)
     {
         if (PHP_VERSION_ID < 80000 && !is_resource($canvas)) {
             throw new DomainException("Canvas must be passed as a resource");
@@ -59,6 +65,8 @@ class Detectable
         }
         $this->detection_data = $detection_data;
         $this->canvas = $canvas;
+				$this->abortTimeInMilliseconds = $abortTimeAfterInMilliseconds;
+				$this->timeStart = $this->getTimeInMilliseconds();
     }
 
     /**
@@ -187,6 +195,9 @@ class Detectable
             $inv_area = 1 / ($w*$w);
             for ($y = 0; $y < $endy; $y += $step) {
                 for ($x = 0; $x < $endx; $x += $step) {
+                    if ($this->abortTimeExceeded()) {
+                        return null;
+										}
                     $passed = $this->detectOnSubImage($x, $y, $scale, $ii, $ii2, $w, $width + 1, $inv_area);
                     if ($passed) {
                         return ['x' => $x, 'y' => $y, 'w' => $w];
@@ -266,4 +277,12 @@ class Detectable
         }
         return true;
     }
+
+		protected function abortTimeExceeded() : bool {
+				return $this->timeStart + $this->abortTimeInMilliseconds < $this->getTimeInMilliseconds();
+		}
+
+		protected function getTimeInMilliseconds() : int|float {
+				return (int) microtime(true) * 1000;
+		}
 }
