@@ -85,8 +85,9 @@ class Detector
         if (!is_file($file)) {
             throw new DomainException("$file is not a file");
         }
-        $canvas = imagecreatefromjpeg($file);
-        return new Detectable($this->detection_data, $canvas);
+        $canvas = $this->imageCreateFromExtension($file);
+
+			return new Detectable($this->detection_data, $canvas);
     }
 
     /**
@@ -102,6 +103,21 @@ class Detector
             throw new DomainException("$string does not contain a valid image");
         }
         return new Detectable($this->detection_data, $canvas);
-    }
+		}
+
+		protected function imageCreateFromExtension(string $file) : false|\GdImage
+		{
+				$extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+				$extension = match ($extension) {
+						'jpg' => 'jpeg',
+						default => $extension,
+				};
+				$function = 'imagecreatefrom'.$extension;
+				if (function_exists($function)) {
+						return $function($file);
+				}
+				return false;
+		}
+
 }
 
