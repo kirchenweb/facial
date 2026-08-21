@@ -117,9 +117,9 @@ class Detectable
     {
         return $this->canvas;
     }
-}
 
-public function getFaceData(): ?array
-{
-    return $this->face;
+    public function getFaceData(): ?array
+    {
+        return $this->face;
+    }
 }
