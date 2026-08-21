@@ -32,6 +32,9 @@ class Detector
     /** @var array */
     protected array $detectionData;
 
+    protected int|float|null $abortTimeInMilliseconds = null;
+    protected int|float|null $timeStart = null;
+
     /**
      * Creates a face-detector with the given configuration
      *
@@ -51,16 +54,16 @@ class Detector
             $this->detectionData = $detection_data;
             return;
         }
-    
+
         if (!is_file($detection_data)) {
             // fallback to same file in this class's directory
             $detection_data = dirname(__FILE__) . DIRECTORY_SEPARATOR . $detection_data;
-            
+
             if (!is_file($detection_data)) {
                 throw new Exception("Couldn't load detection data");
             }
         }
-        
+
         $this->detectionData = unserialize(file_get_contents($detection_data));
     }
 
@@ -68,49 +71,56 @@ class Detector
      * Create a detectable from a resource.
      *
      * @param GdImage $resource
+     * @param int $abortTimeAfterInMilliseconds
      * @return Sensi\Facial\Detectable
      */
-    public function fromResource(GdImage $resource) : Detectable
+    public function fromResource(GdImage $resource, int $abortTimeAfterInMilliseconds = 2000) : Detectable
     {
-        return new Detectable($resource, $this->detectFace($resource));
+        return new Detectable($resource, $this->detectFace($resource, $abortTimeAfterInMilliseconds));
     }
 
     /**
      * Create a detectable from a filename.
      *
      * @param string $file
+     * @param int $abortTimeAfterInMilliseconds
      * @return Sensi\Facial\Detectable
      */
-    public function fromFile(string $file) : Detectable
+    public function fromFile(string $file, int $abortTimeAfterInMilliseconds = 2000) : Detectable
     {
         if (!is_file($file)) {
             throw new DomainException("$file is not a file");
         }
-        $canvas = imagecreatefromjpeg($file);
-        return new Detectable($canvas, $this->detectFace($canvas));
+        $canvas = $this->imageCreateFromExtension($file);
+        return new Detectable($canvas, $this->detectFace($canvas, $abortTimeAfterInMilliseconds));
     }
 
     /**
      * Create a detectable from a (binary) string.
      *
      * @param string $string
+     * @param int $abortTimeAfterInMilliseconds
      * @return Sensi\Facial\Detectable
      */
-    public function fromString(string $string) : Detectable
+    public function fromString(string $string, int $abortTimeAfterInMilliseconds = 2000) : Detectable
     {
-        $canvas = imagecreatefromstring($file);
+        $canvas = imagecreatefromstring($string);
         if (!$canvas) {
             throw new DomainException("$string does not contain a valid image");
         }
-        return new Detectable($canvas, $this->detectFace($canvas));
+        return new Detectable($canvas, $this->detectFace($canvas, $abortTimeAfterInMilliseconds));
     }
 
     /**
      * @param GdImage $canvas
+     * @param int $abortTimeAfterInMilliseconds
      * @return array|null
      */
-    protected function detectFace(GdImage $canvas) :? array
+    protected function detectFace(GdImage $canvas, int $abortTimeAfterInMilliseconds = 2000) :? array
     {
+        $this->abortTimeInMilliseconds = $abortTimeAfterInMilliseconds;
+        $this->timeStart = $this->getTimeInMilliseconds();
+
         $im_width = imagesx($canvas);
         $im_height = imagesy($canvas);
 
@@ -146,6 +156,10 @@ class Detector
             $stats->width,
             $stats->height
         );
+
+        $this->abortTimeInMilliseconds = null;
+        $this->timeStart = null;
+
         if (!$face) {
             return null;
         }
@@ -178,6 +192,9 @@ class Detector
             $inv_area = 1 / ($w*$w);
             for ($y = 0; $y < $endy; $y += $step) {
                 for ($x = 0; $x < $endx; $x += $step) {
+                    if ($this->abortTimeExceeded()) {
+                        return null;
+                    }
                     $passed = $this->detectOnSubImage($x, $y, $scale, $ii, $ii2, $w, $width + 1, $inv_area);
                     if ($passed) {
                         return ['x' => $x, 'y' => $y, 'w' => $w];
@@ -268,5 +285,28 @@ class Detector
         }
         return true;
     }
-}
 
+    protected function imageCreateFromExtension(string $file) : false|\GdImage
+    {
+        $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        $extension = match ($extension) {
+            'jpg' => 'jpeg',
+            default => $extension,
+        };
+        $function = 'imagecreatefrom'.$extension;
+        if (function_exists($function)) {
+            return $function($file);
+        }
+        return false;
+    }
+
+    protected function abortTimeExceeded() : bool
+    {
+        return $this->timeStart + $this->abortTimeInMilliseconds < $this->getTimeInMilliseconds();
+    }
+
+    protected function getTimeInMilliseconds() : int|float
+    {
+        return (int) microtime(true) * 1000;
+    }
+}
