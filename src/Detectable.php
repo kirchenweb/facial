@@ -23,8 +23,6 @@
 
 namespace Sensi\Facial;
 
-use Exception;
-use DomainException;
 use GdImage;
 
 class Detectable
@@ -53,7 +51,16 @@ class Detectable
     }
 
     /**
-     * Returns an image resource (GdImage) with the cropped fase.
+     * @deprecated Use hasFace() instead. The $abortTimeAfterInMilliseconds
+     *  parameter is now passed to Detector::fromFile/fromResource/fromString.
+     */
+    public function detectFace(int $abortTimeAfterInMilliseconds = 2000) : bool
+    {
+        return $this->hasFace();
+    }
+
+    /**
+     * Returns an image resource (GdImage) with the cropped face.
      *
      * @param int|null $minimum_width See this so the crop will never go under
      *  a certain size (e.g., minimum display size of the image in your
@@ -111,4 +118,3 @@ class Detectable
         return $this->canvas;
     }
 }
-
